@@ -1,0 +1,18 @@
+[DBG IRGen] generate() ENTER funcs=3 lemmas(excluded)=0 specFns(excluded)=3
+[DBG IRGen] genFunc(publish_ept) enters=1 enc=1 gn=0 lemma=0 ghost=0
+[DBG IRGen] genContractGate ENTER tag=1 line=0 cond@000002E2466EBB10
+[DBG IRGen] genFunc(publish_ept) after-requires -> genBlock
+[DBG IRGen] genFunc(publish_ept) after-genBlock -> scopeDrain
+[DBG IRGen] genContractGate ENTER tag=2 line=52 cond@000002E2466F6150
+[DBG IRGen] genFunc(invalidate_remote_cache) enters=1 enc=1 gn=0 lemma=0 ghost=0
+[DBG IRGen] genContractGate ENTER tag=1 line=0 cond@000002E2466F78E0
+[DBG IRGen] genFunc(invalidate_remote_cache) after-requires -> genBlock
+[DBG IRGen] genFunc(invalidate_remote_cache) after-genBlock -> scopeDrain
+[DBG IRGen] genContractGate ENTER tag=2 line=62 cond@000002E2466F7AA0
+[DBG IRGen] genFunc(main) enters=0 enc=0 gn=0 lemma=0 ghost=0
+[DBG IRGen] genFunc(main) after-requires -> genBlock
+[DBG IRGen] genFunc(main) after-genBlock -> scopeDrain
+error[run]: program exited with code 2
+  (no source location)
+  --> examples/fix3_tso_test.ox
+

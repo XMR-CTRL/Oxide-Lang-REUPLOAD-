@@ -1,0 +1,10 @@
+Driver.cpp
+Ghost.cpp
+IRGen.cpp
+Lexer.cpp
+main.cpp
+Parser.cpp
+Sema.cpp
+Types.cpp
+Generating Code...
+BUILD_RC=0 

@@ -1,0 +1,13 @@
+**********************************************************************
+** Visual Studio 2026 Developer Command Prompt v18.5.2
+** Copyright (c) 2026 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+
+Microsoft (R) Program Maintenance Utility Version 14.50.35730.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+[  9%] Building CXX object CMakeFiles/oxide.dir/src/Sema.cpp.obj
+Sema.cpp
+[ 18%] Linking CXX executable oxide.exe
+[100%] Built target oxide
