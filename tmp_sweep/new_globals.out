@@ -1,0 +1,6 @@
+N = 10
+stride = 20
+hi, oxide
+counter start = 0
+counter after bumps = 10
+dist = 41

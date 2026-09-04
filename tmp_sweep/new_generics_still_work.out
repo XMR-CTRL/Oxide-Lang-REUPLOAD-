@@ -1,0 +1,13 @@
+7
+42
+9
+11
+1
+hello
+Pair{a: x, b: y}
+d.tag = 5 d.extra = 6 tag_of = 5
+b.id = 70
+drop Owning 70
+defer B
+drop Owning 70
+defer A (runs first at exit)

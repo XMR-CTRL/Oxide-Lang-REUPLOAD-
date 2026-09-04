@@ -1,0 +1,7 @@
+src/Sema.cpp:3692:13: error: no member named 'hasSelf' in 'FuncSig'
+ 3692 |         sig.hasSelf = m->hasSelf;
+      |         ~~~ ^
+src/Sema.cpp:3693:13: error: no member named 'selfByRef' in 'FuncSig'
+ 3693 |         sig.selfByRef = m->selfByRef;
+      |         ~~~ ^
+2 errors generated.

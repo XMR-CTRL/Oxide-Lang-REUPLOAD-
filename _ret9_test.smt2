@@ -1,0 +1,7 @@
+(declare-const p_integrity_scan_current (Array Int Int))
+(declare-const p_integrity_scan_golden (Array Int Int))
+(define-fun integrity_scan_ensures_ret_9_1 () Bool (or (= 4 4) (not (= (select p_integrity_scan_current 4) (select p_integrity_scan_golden 4)))))
+(push)
+(assert (not integrity_scan_ensures_ret_9_1))
+(check-sat-using (then simplify smt))
+(pop)

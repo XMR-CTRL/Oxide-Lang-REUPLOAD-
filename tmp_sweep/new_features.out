@@ -1,0 +1,8 @@
+factorial 1 = 1
+factorial 2 = 2
+factorial 3 = 6
+factorial 4 = 24
+factorial 5 = 120
+factorial 6 = 720
+classify sum 0..49= 89
+booleans work

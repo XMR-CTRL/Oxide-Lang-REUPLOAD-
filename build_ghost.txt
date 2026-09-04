@@ -1,0 +1,38 @@
+In file included from src/Ghost.cpp:50:
+src\Smt.h:95:30: error: no template named 'vector' in namespace 'std'
+   95 |                   const std::vector<std::string>& premises = {});
+      |                         ~~~~~^
+src\Smt.h:100:42: error: no template named 'vector' in namespace 'std'
+  100 |                const Expr* e, const std::vector<std::string>& premises = {});
+      |                                     ~~~~~^
+src/Ghost.cpp:174:57: error: no viable conversion from 'std::map<std::string, std::string>' (aka 'std::map<basic_string<char, char_traits<char>, allocator<char>>, basic_string<char, char_traits<char>, allocator<char>>>') to 'std::string' (aka 'basic_string<char, char_traits<char>, allocator<char>>')
+  174 |       SmtCtx bc{bodyScratch, nullptr, 0, 0, c.declared, c.nameMap, {}};
+      |                                                         ^~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xstring:766:18: note: candidate constructor not viable: no known conversion from 'std::map<std::string, std::string>' (aka 'std::map<basic_string<char, char_traits<char>, allocator<char>>, basic_string<char, char_traits<char>, allocator<char>>>') to 'const basic_string<char> &' for 1st argument
+  766 |     _CONSTEXPR20 basic_string(const basic_string& _Right)
+      |                  ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xstring:818:18: note: candidate constructor not viable: no known conversion from 'std::map<std::string, std::string>' (aka 'std::map<basic_string<char, char_traits<char>, allocator<char>>, basic_string<char, char_traits<char>, allocator<char>>>') to 'const char *const' for 1st argument
+  818 |     _CONSTEXPR20 basic_string(_In_z_ const _Elem* const _Ptr) : _Mypair(_Zero_then_variadic_args_t{}) {
+      |                  ^                   ~~~~~~~~~~~~~~~~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xstring:1077:18: note: candidate constructor not viable: no known conversion from 'std::map<std::string, std::string>' (aka 'std::map<basic_string<char, char_traits<char>, allocator<char>>, basic_string<char, char_traits<char>, allocator<char>>>') to 'basic_string<char> &&' for 1st argument
+ 1077 |     _CONSTEXPR20 basic_string(basic_string&& _Right) noexcept
+      |                  ^            ~~~~~~~~~~~~~~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xstring:1390:18: note: candidate constructor not viable: no known conversion from 'std::map<std::string, std::string>' (aka 'std::map<basic_string<char, char_traits<char>, allocator<char>>, basic_string<char, char_traits<char>, allocator<char>>>') to 'initializer_list<char>' for 1st argument
+ 1390 |     _CONSTEXPR20 basic_string(initializer_list<_Elem> _Ilist, const _Alloc& _Al = allocator_type())
+      |                  ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xstring:762:27: note: explicit constructor is not a candidate
+  762 |     _CONSTEXPR20 explicit basic_string(const _Alloc& _Al) noexcept : _Mypair(_One_then_variadic_args_t{}, _Al) {
+      |                           ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xstring:1200:27: note: explicit constructor is not a candidate
+ 1200 |     _CONSTEXPR20 explicit basic_string(const _StringViewIsh& _Right, const _Alloc& _Al = _Alloc())
+      |                           ^
+src/Ghost.cpp:640:53: error: expected ';' after expression
+  640 |     out << "(assert (not (forall (" << argList.str() ") "
+      |                                                     ^
+      |                                                     ;
+src/Ghost.cpp:641:9: error: invalid operands to binary expression ('const char[3]' and 'const char[5]')
+  640 |     out << "(assert (not (forall (" << argList.str() ") "
+      |                                                      ~~~~
+  641 |         << "(=> " << concReqTerm << " (=> " << concEnsTerm << " " << specTerm << ")))))\n";
+      |         ^  ~~~~~~
+5 errors generated.

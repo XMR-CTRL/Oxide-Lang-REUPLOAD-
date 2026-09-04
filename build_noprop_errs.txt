@@ -1,0 +1,119 @@
+In file included from src/Driver.cpp:3:
+In file included from src\Parser.h:3:
+src\AST.h:246:3: error: unknown type name 'Expr'
+  246 |   Expr* expr = nullptr;   // NOT owned here; owned by the TypedefDecl in Program
+      |   ^
+src\AST.h:248:70: error: unknown type name 'Expr'
+  248 | void registerRangeType(const std::string& name, const BType& target, Expr* expr);
+      |                                                                      ^
+src/Driver.cpp:6303:24: warning: 'getenv' is deprecated: This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+ 6303 |   const char* t = std::getenv("TEMP");
+      |                        ^
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.28000.0\ucrt\stdlib.h:1183:20: note: 'getenv' has been explicitly marked deprecated here
+ 1183 |     _Check_return_ _CRT_INSECURE_DEPRECATE(_dupenv_s)
+      |                    ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\vcruntime.h:368:55: note: expanded from macro '_CRT_INSECURE_DEPRECATE'
+  368 |         #define _CRT_INSECURE_DEPRECATE(_Replacement) _CRT_DEPRECATE_TEXT(    \
+      |                                                       ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\vcruntime.h:358:47: note: expanded from macro '_CRT_DEPRECATE_TEXT'
+  358 | #define _CRT_DEPRECATE_TEXT(_Text) __declspec(deprecated(_Text))
+      |                                               ^
+src/Driver.cpp:6304:20: warning: 'getenv' is deprecated: This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+ 6304 |   if (!t) t = std::getenv("TMP");
+      |                    ^
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.28000.0\ucrt\stdlib.h:1183:20: note: 'getenv' has been explicitly marked deprecated here
+ 1183 |     _Check_return_ _CRT_INSECURE_DEPRECATE(_dupenv_s)
+      |                    ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\vcruntime.h:368:55: note: expanded from macro '_CRT_INSECURE_DEPRECATE'
+  368 |         #define _CRT_INSECURE_DEPRECATE(_Replacement) _CRT_DEPRECATE_TEXT(    \
+      |                                                       ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\vcruntime.h:358:47: note: expanded from macro '_CRT_DEPRECATE_TEXT'
+  358 | #define _CRT_DEPRECATE_TEXT(_Text) __declspec(deprecated(_Text))
+      |                                               ^
+2 warnings and 2 errors generated.
+In file included from src/IRGen.cpp:1:
+In file included from src\IRGen.h:3:
+src\AST.h:246:3: error: unknown type name 'Expr'
+  246 |   Expr* expr = nullptr;   // NOT owned here; owned by the TypedefDecl in Program
+      |   ^
+src\AST.h:248:70: error: unknown type name 'Expr'
+  248 | void registerRangeType(const std::string& name, const BType& target, Expr* expr);
+      |                                                                      ^
+2 errors generated.
+src/main.cpp:125:26: warning: 'getenv' is deprecated: This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+  125 |     const char* t = std::getenv("TEMP");
+      |                          ^
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.28000.0\ucrt\stdlib.h:1183:20: note: 'getenv' has been explicitly marked deprecated here
+ 1183 |     _Check_return_ _CRT_INSECURE_DEPRECATE(_dupenv_s)
+      |                    ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\vcruntime.h:368:55: note: expanded from macro '_CRT_INSECURE_DEPRECATE'
+  368 |         #define _CRT_INSECURE_DEPRECATE(_Replacement) _CRT_DEPRECATE_TEXT(    \
+      |                                                       ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\vcruntime.h:358:47: note: expanded from macro '_CRT_DEPRECATE_TEXT'
+  358 | #define _CRT_DEPRECATE_TEXT(_Text) __declspec(deprecated(_Text))
+      |                                               ^
+src/main.cpp:126:22: warning: 'getenv' is deprecated: This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+  126 |     if (!t) t = std::getenv("TMP");
+      |                      ^
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.28000.0\ucrt\stdlib.h:1183:20: note: 'getenv' has been explicitly marked deprecated here
+ 1183 |     _Check_return_ _CRT_INSECURE_DEPRECATE(_dupenv_s)
+      |                    ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\vcruntime.h:368:55: note: expanded from macro '_CRT_INSECURE_DEPRECATE'
+  368 |         #define _CRT_INSECURE_DEPRECATE(_Replacement) _CRT_DEPRECATE_TEXT(    \
+      |                                                       ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\vcruntime.h:358:47: note: expanded from macro '_CRT_DEPRECATE_TEXT'
+  358 | #define _CRT_DEPRECATE_TEXT(_Text) __declspec(deprecated(_Text))
+      |                                               ^
+2 warnings generated.
+In file included from src/Parser.cpp:1:
+In file included from src\Parser.h:3:
+src\AST.h:246:3: error: unknown type name 'Expr'
+  246 |   Expr* expr = nullptr;   // NOT owned here; owned by the TypedefDecl in Program
+      |   ^
+src\AST.h:248:70: error: unknown type name 'Expr'
+  248 | void registerRangeType(const std::string& name, const BType& target, Expr* expr);
+      |                                                                      ^
+2 errors generated.
+In file included from src/Sema.cpp:1:
+In file included from src\Sema.h:3:
+src\AST.h:246:3: error: unknown type name 'Expr'
+  246 |   Expr* expr = nullptr;   // NOT owned here; owned by the TypedefDecl in Program
+      |   ^
+src\AST.h:248:70: error: unknown type name 'Expr'
+  248 | void registerRangeType(const std::string& name, const BType& target, Expr* expr);
+      |                                                                      ^
+src/Sema.cpp:3579:7: error: no matching function for call to 'registerRangeType'
+ 3579 |       registerRangeType(td->name, resolved, td->rangeExpr.get());
+      |       ^~~~~~~~~~~~~~~~~
+src\AST.h:248:6: note: candidate function not viable: no known conversion from 'pointer' (aka 'Expr *') to 'int *' for 3rd argument
+  248 | void registerRangeType(const std::string& name, const BType& target, Expr* expr);
+      |      ^                                                               ~~~~~~~~~~
+3 errors generated.
+In file included from src/Types.cpp:1:
+src\AST.h:246:3: error: unknown type name 'Expr'
+  246 |   Expr* expr = nullptr;   // NOT owned here; owned by the TypedefDecl in Program
+      |   ^
+src\AST.h:248:70: error: unknown type name 'Expr'
+  248 | void registerRangeType(const std::string& name, const BType& target, Expr* expr);
+      |                                                                      ^
+In file included from src/Types.cpp:3:
+In file included from C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\map:12:
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xtree:1395:50: error: no matching member function for call to '_Find_lower_bound'
+ 1395 |         const _Tree_find_result<_Nodeptr> _Loc = _Find_lower_bound(_Keyval);
+      |                                                  ^~~~~~~~~~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xtree:1405:25: note: in instantiation of function template specialization 'std::_Tree<std::_Tmap_traits<std::basic_string<char>, RangeTypeEntry, std::less<std::basic_string<char>>, std::allocator<std::pair<const std::basic_string<char>, RangeTypeEntry>>, false>>::_Find<std::basic_string<char>>' requested here
+ 1405 |         return iterator(_Find(_Keyval), _Get_scary());
+      |                         ^
+src/Types.cpp:361:26: note: in instantiation of member function 'std::_Tree<std::_Tmap_traits<std::basic_string<char>, RangeTypeEntry, std::less<std::basic_string<char>>, std::allocator<std::pair<const std::basic_string<char>, RangeTypeEntry>>, false>>::find' requested here
+  361 |   auto it = rangeTable().find(name);
+      |                          ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xtree:1639:33: note: candidate template ignored: substitution failure [with _Keyty = std::basic_string<char>]
+ 1639 |     _Tree_find_result<_Nodeptr> _Find_lower_bound(const _Keyty& _Keyval) const {
+      |                                 ^
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xtree:1396:13: error: no matching member function for call to '_Lower_bound_duplicate'
+ 1396 |         if (_Lower_bound_duplicate(_Loc._Bound, _Keyval)) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\include\xtree:1634:10: note: candidate template ignored: substitution failure [with _Keyty = std::basic_string<char>]
+ 1634 |     bool _Lower_bound_duplicate(const _Nodeptr _Bound, const _Keyty& _Keyval) const {
+      |          ^
+4 errors generated.

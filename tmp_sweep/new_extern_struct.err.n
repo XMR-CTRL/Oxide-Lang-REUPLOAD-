@@ -1,0 +1,6 @@
+lld-link: error: undefined symbol: CreateHwnd
+>>> referenced by C:/Users/mosky/AppData/Local/Temp/oxide_out-TMP.o:(oxide_main)
+
+lld-link: error: undefined symbol: DemandOpaquePtr
+>>> referenced by C:/Users/mosky/AppData/Local/Temp/oxide_out-TMP.o:(oxide_main)
+clang: error: linker command failed with exit code 1 (use -v to see invocation)

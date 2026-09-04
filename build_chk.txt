@@ -1,0 +1,3 @@
+lld-link: error: undefined symbol: void __cdecl ox_smt::emitGhostSection(struct Program const &, class std::basic_ostringstream<char, struct std::char_traits<char>, class std::allocator<char>> &)
+>>> referenced by C:\Users\mosky\AppData\Local\Temp\Driver-2f6ce2.o:(bool __cdecl ox_smt::emitSmt(struct Program const &, class std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>> const &))
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
