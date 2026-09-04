@@ -1,0 +1,241 @@
+// Smt.h — shared SMT-LIB emission types + declarations.
+//
+// Factored out of src/Driver.cpp so the Ghost encoder (src/Ghost.cpp) can share
+// the same SmtCtx, helpers (smtExpr / smtPlaceholder / smtDeclareConst /
+// smtClause / smtDischarge / collectOldNames / smtSort), and entry point
+// (emitSmt) without having to duplicate them or manufacture a second
+// parallel walker. Everything here lives in namespace `ox_smt` and is defined
+// either in Driver.cpp (the contract walker) or Ghost.cpp (the T1/T2/T3 ghost
+// encoder section, appended by emitSmt).
+//
+// The contract walker is sound-but-loose: it encodes requires/ensures/
+// invariant/assert clauses as SMT terms and emits the negated discharge query
+// per clause. Unsupported subforms (calls, array index, field access, casts)
+// are replaced by a fresh uninterpreted constant flagged with a trailing
+// `; note:` so the file stays well-sorted and a clause using such a placeholder
+// honestly fails to reach `unsat`. See the long header comment in Driver.cpp
+// at the top of the `namespace ox_smt {` block for the full encoding notes.
+
+#pragma once
+
+#include <sstream>
+#include <string>
+#include <set>
+#include <map>
+#include <vector>
+
+struct BType;        // defined in AST.h (fwd-declared here to keep Smt.h light)
+struct Expr;        // AST.h
+struct Program;     // AST.h
+struct SpecFnDecl;  // AST.h — spec fn bodies used for contract-call inlining
+struct FuncDecl;    // AST.h — concrete fn bodies used for WP call summaries
+class  Sema;        // Sema.h
+
+namespace ox_smt {
+
+// ---------------------------------------------------------------------------
+// SmtCtx — per-function SMT emission scope. The walker carries one of these
+// through every clause; declarations accumulated here persist across the
+// function's clauses (params, result, old_ snapshots, quantifier binders,
+// ghost-let names) so clause terms resolve against a function-unique symbol
+// space (`p_<fn>_<param>`, `<fn>_result`, `<fn>_old_<x>`, etc.).
+//
+// `curFn` qualifies placeholder names so two functions' `ph0` can't collide.
+// `nameMap` maps a bare Oxide source name to its fully-qualified SMT symbol so
+// clause terms written with the source-level name (`n`, `result`, `old(x)`'s
+// `x`) resolve to the function-unique decl. `declared` tracks every name
+// already declared as a constant in the current scope, so we don't redeclare
+// and unknown VarRefs fall to a placeholder cleanly.
+// `constGlobals` carries compile-time integer `const` globals substituted as
+// literals (so SDM cross-reference asserts like
+// `assert VMCS_EPT_POINTER == 0x001A` can discharge to `unsat` instead of
+// decaying to an uninterpreted placeholder).
+// `specFns` indexes `spec fn` declarations by bare source name so contract
+// clauses can lower `spec_predicate(args...)` as a real inlined SMT term rather
+// than as an opaque call placeholder. `expandingSpecFns` prevents recursive spec
+// definitions from blowing the encoder stack; recursion falls back to an honest
+// placeholder.
+// ---------------------------------------------------------------------------
+struct SmtCtx {
+  std::ostringstream& out;
+  Sema* sema = nullptr;                // unused; reserved for type resolution
+  int placeholderSeq = 0;              // fresh uninterpreted-constant counter
+  int assertSeq = 0;                   // per-function assert counter, for naming
+  std::set<std::string> declared;
+  std::string curFn;
+  std::map<std::string, std::string> nameMap;
+  std::map<std::string, long long> constGlobals;
+  std::map<std::string, const SpecFnDecl*> specFns;
+  std::map<std::string, const FuncDecl*> funcDecls;
+  std::map<std::string, const FuncDecl*> methodDecls;
+  std::set<std::string> expandingSpecFns;
+  // D1 — concrete-`fn` recursion guard. `expandingSpecFns` above guards
+  // `spec fn` inlining only (smtInlineSpecCall); concrete `fn` callees go
+  // through `smtConcreteCallResult`, which inlines the callee body to derive
+  // its post-state. A recursive `fn walk(...){ return walk(...); }` makes the
+  // inliner chase `walk -> walk -> walk -> ...` and blows the C++ stack.
+  // `inlineStack` mirrors the spec guard: it carries the names of every
+  // concrete `fn` currently being inlined, so `smtConcreteCallResult` can
+  // detect that the callee is on the stack (direct OR indirect recursion)
+  // and switch to Dafny/Why3 "assume callee's contract" mode — declare a
+  // fresh `result` symbol + assert the callee's `ensures` clauses under the
+  // callee's `requires` premise, instead of re-inlining the body.
+  std::vector<std::string> inlineStack;
+  std::set<std::string> lenSyms;
+  // Tier 3 — fixed array length symbols. Maps an SMT base symbol (e.g.
+  // `p_sumAll_a` or `ept_table`) to its declared compile-time count
+  // (`BType::count`). `smtLenOf` consults this to emit an equality
+  // `(assert (= len_<base> N))` instead of just `(>= len_<base> 0)` so a
+  // `requires 0 <= idx < len(arr)` clause can fold the bound to a literal
+  // and actually discharge. Populated by `emitFnContracts` for params
+  // (after `nameMap[p.name] = q` we record `arrayLenSyms[q] = N`) and
+  // for non-const mutable global arrays (same keying). Slices and dynarrays
+  // aren't keyed here — they legitimately stay uninterpreted.
+  std::map<std::string, int32_t> arrayLenSyms;
+  std::vector<std::string> wpPremises;
+  std::string wpPathCond;
+  // Tier 2a — when this function is an impl-block method with a `self` receiver,
+  // `selfStructName` holds the owning struct's name ("" for free fns). Set by
+  // `emitFnContracts` after looking up `fn.implStruct` in `prog.structs`. The
+  // WP `Field` arm consults this so `self.x` resolves to the per-field SMT
+  // const `self__<S>__<x>` that the seeding block declared at function entry.
+  // Empty for free fns / associated fns — a `Field` on a non-self base still
+  // punts to `smtPlaceholder` (Tier 2a scope).
+  std::string selfStructName;
+  // Symbols DECLARED as native `(_ BitVec 64)` (not Int). A source value that
+  // flows into a bitwise/shift op is declared here as a real fixed-width word:
+  // it is emitted bare in bit context (so the query stays in decidable QF_BV —
+  // Z3 returns a decisive sat/unsat with a counterexample model instead of
+  // `unknown`), models true 64-bit wraparound (bvadd/bvor/bvshl), and is
+  // `bv2int`-wrapped only when pure-integer arithmetic needs it. `bv2int` of a
+  // declared BV is the decidable direction — unlike `int2bv` of a free Int,
+  // which is what made the old Int-bridged encoding punt to `unknown`.
+  std::set<std::string> bvVars;
+  // Oxide SOURCE names that the WP walker has bound to a bitop-flowing RHS
+  // (`let masked = w & ALL_ONES` => `masked` lands here). Distinct from
+  // `bvVars` — that holds declared SMT *symbols* (params/result); `wpBvNames`
+  // holds the source-level names whose *value* in the WP store is a bv-bridge
+  // term. The arithmetic-operand helper consults this so a later
+  // `wrapped = masked + 1` keeps the chain in `bvadd` (real 64-bit wrap)
+  // rather than crossing back to unbounded Int `+` and losing overflow.
+  std::set<std::string> wpBvNames;
+};
+
+// SMT sort name for an Oxide type. Bool -> "Bool", f32/f64 -> "Real",
+// everything else (i*/u*/ptr/enum/...) -> "Int".
+// By-value, fully recursive variant: nested-array sorts (`[[i64; 2]; 2]` ->
+// `(Array Int (Array Int Int))`) compose correctly (no shared static buffer).
+std::string smtSortStr(const BType& t);
+// Backward-compat const char* shim — materialises smtSortStr into a
+// thread-local buffer ONCE per call. Callers that stash the pointer across
+// multiple smtSort calls must copy to std::string themselves (see Ghost.cpp's
+// std::vector<std::string> use).
+const char* smtSort(const BType& t);
+
+// SMT-legal identifier for a function param / local / result / old-name.
+// Prefixed to avoid clashes with SMT keywords and other Oxide names.
+std::string sym(const std::string& kind, const std::string& name);
+
+// Emit `(declare-const name sort)` once and remember it in `declared`.
+void smtDeclareConst(SmtCtx& c, const std::string& name, const char* sort);
+
+// Recursively lower one spec expression to an SMT term (string). Unsupported
+// subforms go to `smtPlaceholder` (honest uninterpreted const + `; note:`).
+std::string smtExpr(SmtCtx& c, const Expr* e);
+
+// Synthesize `ph<N>` (function-qualified) as a fresh uninterpreted constant of
+// `sort`, declare + emit a `; note:` describing `why`, and return its name.
+std::string smtPlaceholder(SmtCtx& c, const char* sort, const char* why);
+
+// Collect every `old(<bareName>)` mention in a spec expr (so the function's
+// entry can pre-declare the old_<x> snapshots once).
+void collectOldNames(const Expr* e, std::set<std::string>& out);
+
+// Emit the discharge query for one clause:
+//   (push) [(assert <premise>) ...] (assert (not <clause-term>)) (check-sat) (pop)
+// `unsat` => clause holds for all inputs under the premises. `premises` is
+// how `requires` is carried into the discharge of `ensures`/`assert`/
+// `invariant` (Hoare-logic: prove Body ⊢ clause under Pre).
+void smtDischarge(SmtCtx& c, const std::string& label, const std::string& term,
+                  const std::vector<std::string>& premises = {});
+
+// Emit a clause as a named `(define-fun <label> () Bool <term>)` and discharge
+// it. `premises` forwarded to smtDischarge. Caller pre-populates `c.declared`.
+void smtClause(SmtCtx& c, const std::string& fnName, const char* kind, int idx,
+               const Expr* e, const std::vector<std::string>& premises = {});
+
+// Entry point called from Driver::run for `--emit-smt PATH` (and by `verify`).
+// Walks every non-extern function with contracts, writes a complete .smt2 file
+// (contracts section + the ghost section from emitGhostSection + `(exit)`).
+bool emitSmt(const Program& prog, const std::string& outPath);
+
+// ---------------------------------------------------------------------------
+// T1/T2/T3 Ghost encoder — implemented in src/Ghost.cpp, invoked from
+// emitSmt right before the trailing `(exit)`. Appends to the SAME ostringstream
+// so everything lands in one .smt2 file a single Z3 run can consume.
+//
+//   T1 — `spec fn` declarations : each spec fn is either a real SMT
+//        `(define-fun ...)` (if its body is pure arithmetic/boolean over its
+//        params) or a `(declare-fun ...)` uninterpreted function (honest, with
+//        a `; note:`) when the body contains calls/array/field — so contract
+//        clauses that NAME a spec fn resolve to a real symbol.
+//        `refines <concrete> <= <spec>` emits a discharge query per relation:
+//        forall args (requires_spec(args) ==> requires_concrete(args)) AND
+//        forall args (ensures_concrete(args) ==> ensures_spec(args)). If either
+//        name is unresolved or signatures don't match, it emits nothing but a
+//        `; note: refines <a> <= <b> skipped` honesty line — NEVER a false
+//        `unsat`.
+//   T2 — ghost let / ghost fn : every `ghost let x: T` in the program becomes
+//        a `(declare-const ghost_<fn>_<x> <Sort>)` so contract clauses that
+//        reference it resolve to a real symbol (its value is unconstrained
+//        Int/Bool — sound; the proof obligation is carried by the clause).
+//        `ghost fn` ensures/requires are reflected like any concrete fn.
+//   T3 — region / modifies : each `region R = { a, b, ghost_c }` is expanded
+//        to its member set. For each function with a `modifies` clause, a
+//        frame axiom per NON-modified symbol is emitted: that symbol equals
+//        its `old()` value. If `modifies` is empty (the conservative default),
+//        no frame axiom is emitted — the function is treated as a potential
+//        mutator of everything. The `; note:` mechanism documents each
+//        emitted axiom so Z3 output stays readable.
+// ---------------------------------------------------------------------------
+
+// The ghost section is a no-op (emits nothing) when the program declares none
+// of the T1/T2/T3 constructs — so existing contract output stays
+// byte-identical (this is what makes the feature additive).
+void emitGhostSection(const Program& prog, std::ostringstream& out);
+
+// ---------------------------------------------------------------------------
+// Tier 1 — per-function post-state terms for mutable globals.
+//
+// After `emitFnContracts` walks a function's body with the WP encoder
+// (`smtEncodeStmts`), the symbolic `store` it threaded through the body
+// holds, for every name the body touched, the final SMT term that name
+// resolves to at function exit. By seeding `store[g]` at function entry
+// with a fresh pre-state const `<fn>_old_<g>` for every non-const global `g`,
+// we get:
+//   - if the body NEVER assigns `g`: `store[g]` is still `<fn>_old_<g>` at
+//     exit → the frame axiom `(= store[g] <fn>_old_<g>)` collapses to
+//     `(= old old)` and discharges (unsat negation) — provably unchanged.
+//   - if the body ASSIGNS `g`: `store[g]` is the new post term, generally
+//     distinct from `<fn>_old_<g>` → the frame's negation is sat, honestly
+//     flagging that the function touched a global it didn't claim to modify.
+//
+// `PostStateMap` is keyed by the fn's symbol prefix (free fn name OR
+// `mangleMethod(structName, methodName)` for impl methods — matching the
+// Ghost section's frame-axiom keying), then by the bare source-global name.
+// A missing (fn, g) entry means the WP encoder could not symbolically track
+// `g` for that fn (e.g. unsupported body form, or the post term escaped via
+// an early `return` inside a branch the WP walker couldn't merge). The frame
+// emitter falls back to today's vacuous axiom (two fresh top-level uninterp
+// consts) — strictly weaker but never unsound.
+// ---------------------------------------------------------------------------
+using PostStateMap = std::map<std::string, std::map<std::string, std::string>>;
+
+// Tier 1 — overload of `emitGhostSection` that also threads the per-function
+// post-state map so frame axioms are non-vacuous. The 2-arg overload above
+// delegates here with an empty map (yields the pre-Tier-1 vacuous-frame
+// behaviour for any hypothetical external caller).
+void emitGhostSection(const Program& prog, std::ostringstream& out,
+                      const PostStateMap& postIdents);
+
+} // namespace ox_smt
