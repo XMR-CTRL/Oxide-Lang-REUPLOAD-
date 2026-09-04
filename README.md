@@ -1,4 +1,4 @@
-# Oxide (THIS README IS OLD AND IS PENDING UPDATE)
+# Oxide (THIS README IS OLD AND IS PENDING UPDATE PLEASE REFER TO THE DOCS & CREDITS TO NERO FOR MAKING THEM)
 
 Oxide is a small compiled programming language with C like curly brace syntax.
 It is written in C++17 and targets LLVM. The compiler emits textual LLVM IR and
